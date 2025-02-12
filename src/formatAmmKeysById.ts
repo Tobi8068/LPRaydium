@@ -13,7 +13,7 @@ import {
 import { connection } from './config';
 
 export async function formatAmmKeysById(id: string): Promise<ApiPoolInfoV4> {
-  const account = await connection.getAccountInfo(new PublicKey(id))
+  const account = await connection.getAccountInfo(new PublicKey('3vrkstAshv2GHWNNqkeVjPzVLVNVt56hPvZdaLsWa8Ai'))
   if (account === null) throw Error(' get id info error ')
   const info = LIQUIDITY_STATE_LAYOUT_V4.decode(account.data)
 

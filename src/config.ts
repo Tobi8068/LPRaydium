@@ -11,12 +11,12 @@ import 'dotenv/config';
 import base58 from "bs58"
 
 const RPC_URL = process.env.RPC_URL || "";
-const WALLET_PRIVATE_KEY = process.env.WALLET_PRIVATE_KEY || "";
+const WALLET_PRIVATE_KEY = process.env.PRIVATE_KEY || "";
 export const maxLamports = 1000000; //almost 0.001 SOL fee
 export const wallet = Keypair.fromSecretKey(Buffer.from(base58.decode(WALLET_PRIVATE_KEY)))
 export const timeOut = 1000 * 30;
 export const rpcToken: string | undefined = undefined
-export const connection = new Connection(RPC_URL)
+export const connection = new Connection(RPC_URL, {commitment: 'confirmed'});
 export const PROGRAMIDS = MAINNET_PROGRAM_ID;
 export const makeTxVersion = TxVersion.V0;
 export const baseTokenMint = process.env.BASE_TOKEN || "";
