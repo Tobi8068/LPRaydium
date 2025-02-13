@@ -73,6 +73,7 @@ export async function ammAddLiquidity(
     fixedSide: 'a',
     makeTxVersion,
   })
-
-  return { txids: await buildAndSendTx(addLiquidityInstructionResponse.innerTransactions), lpToken, liquidity }
+  let txids = await buildAndSendTx(addLiquidityInstructionResponse.innerTransactions) || []
+  console.log("## Adding Liquidity : TX : ", txids[0])
+  return { txids, lpToken, liquidity }
 }

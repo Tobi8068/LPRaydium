@@ -41,12 +41,13 @@ export async function sendTx(
 }
 
 export async function buildAndSendTx(innerSimpleV0Transaction: InnerSimpleV0Transaction[], options?: SendOptions) {
+
     const willSendTx = await buildSimpleTransaction({
         connection,
         makeTxVersion,
         payer: wallet.publicKey,
         innerTransactions: innerSimpleV0Transaction,
-        addLookupTableInfo: addLookupTableInfo,
+        addLookupTableInfo
     })
 
     return await sendTx(connection, wallet, willSendTx, options)

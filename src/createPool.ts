@@ -2,19 +2,20 @@ import { BN } from 'bn.js';
 
 import {
   Liquidity,
-  MAINNET_PROGRAM_ID,
   Token,
 } from '@raydium-io/raydium-sdk';
 import {
   Keypair,
   PublicKey,
+  SendTransactionError
 } from '@solana/web3.js';
 
 import {
   connection,
   makeTxVersion,
   PROGRAMIDS,
-  maxLamports
+  maxLamports,
+  feeDestinationId
 } from './config';
 import {
   buildAndSendTx,
@@ -49,7 +50,7 @@ export function getMarketAssociatedPoolKeys(input: LiquidityPairTargetInfo) {
     quoteDecimals: input.quoteToken.decimals,
     marketId: input.targetMarketId,
     programId: PROGRAMIDS.AmmV4,
-    marketProgramId: MAINNET_PROGRAM_ID.OPENBOOK_MARKET,
+    marketProgramId: PROGRAMIDS.OPENBOOK_MARKET,
   })
 }
 
@@ -61,8 +62,9 @@ type TestTxInputInfo = LiquidityPairTargetInfo &
     wallet: Keypair
   }
 
-export async function ammCreatePool(input: TestTxInputInfo): Promise<PublicKey> {
+export async function ammCreatePool(input: TestTxInputInfo): Promise<{ txids: string[], poolId: PublicKey }> {
   // -------- step 1: make instructions --------
+  try {
   const initPoolInstructionResponse = await Liquidity.makeCreatePoolV4InstructionV2Simple({
     connection,
     programId: PROGRAMIDS.AmmV4,
@@ -87,8 +89,16 @@ export async function ammCreatePool(input: TestTxInputInfo): Promise<PublicKey> 
       microLamports: maxLamports,
     },
     makeTxVersion,
-    feeDestinationId: new PublicKey('7YttLkHDoNj9wyDur5pM1ejNaAvT9X4eqaYcHQqtj2G5'), // only mainnet use this
+    feeDestinationId
   })
-
-  return initPoolInstructionResponse.address.ammId
+  console.log("Pool ID: ", initPoolInstructionResponse.address.ammId);
+  return { txids: await buildAndSendTx(initPoolInstructionResponse.innerTransactions), poolId: initPoolInstructionResponse.address.ammId };
+} catch (error) {
+  if (error instanceof SendTransactionError) {
+    console.error("Transaction failed:", error.message);
+  } else {
+    console.error("Unexpected error:", error);
+  }
+  throw error; // Rethrow the error if needed
+}
 }
